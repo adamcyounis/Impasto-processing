@@ -59,7 +59,7 @@ void FinishStroke() {
   s.strokeRadius = radius;
 
   // Add stroke points to shape (with some filtering for smoothness)
-  ArrayList<PVector> filteredStroke = filterStrokePoints(stroke);
+  ArrayList<PVector> filteredStroke = FilterStrokePoints(stroke);
   for (PVector p : filteredStroke) {
     s.AddPoint(p.x, p.y);
   }
@@ -133,7 +133,7 @@ Shape createBrushStroke(ArrayList<PVector> strokePath, float brushRadius) {
 
 
 // Improved stroke point filtering with overlap elimination
-ArrayList<PVector> filterStrokePoints(ArrayList<PVector> rawStroke) {
+ArrayList<PVector> FilterStrokePoints(ArrayList<PVector> rawStroke) {
   if (rawStroke.size() < 3) return rawStroke;
 
   // First pass: Remove points too close together
@@ -155,7 +155,7 @@ ArrayList<PVector> filterStrokePoints(ArrayList<PVector> rawStroke) {
   ArrayList<PVector> simplified = douglasPeucker(distanceFiltered, radius * 0.2);
 
   // Third pass: Remove points that would create internal overlaps
-  return removeOverlapPoints(simplified, radius);
+  return RemoveOverlapPoints(simplified, radius);
 }
 
 // Douglas-Peucker line simplification algorithm
@@ -170,7 +170,7 @@ ArrayList<PVector> douglasPeucker(ArrayList<PVector> points, float epsilon) {
   PVector end = points.get(points.size() - 1);
 
   for (int i = 1; i < points.size() - 1; i++) {
-    float dist = pointToLineDistance(points.get(i), start, end);
+    float dist = PointToLineDistance(points.get(i), start, end);
     if (dist > maxDist) {
       maxDist = dist;
       maxIndex = i;
@@ -201,7 +201,7 @@ ArrayList<PVector> douglasPeucker(ArrayList<PVector> points, float epsilon) {
 }
 
 // Calculate perpendicular distance from point to line
-float pointToLineDistance(PVector point, PVector lineStart, PVector lineEnd) {
+float PointToLineDistance(PVector point, PVector lineStart, PVector lineEnd) {
   float A = point.x - lineStart.x;
   float B = point.y - lineStart.y;
   float C = lineEnd.x - lineStart.x;
@@ -227,7 +227,7 @@ float pointToLineDistance(PVector point, PVector lineStart, PVector lineEnd) {
 }
 
 // Remove points that would create overlapping brush strokes
-ArrayList<PVector> removeOverlapPoints(ArrayList<PVector> points, float brushRadius) {
+ArrayList<PVector> RemoveOverlapPoints(ArrayList<PVector> points, float brushRadius) {
   if (points.size() < 4) return points;
 
   ArrayList<PVector> filtered = new ArrayList<PVector>();
@@ -244,7 +244,7 @@ ArrayList<PVector> removeOverlapPoints(ArrayList<PVector> points, float brushRad
     for (int j = filtered.size() - checkBack; j < filtered.size(); j++) {
       if (PVector.dist(current, filtered.get(j)) < overlapThreshold) {
         // Check if this point would create a "fold back" in the stroke
-        if (j < filtered.size() - 1 && wouldCreateFoldback(filtered.get(j), current, filtered.get(filtered.size() - 1))) {
+        if (j < filtered.size() - 1 && WouldCreateFoldback(filtered.get(j), current, filtered.get(filtered.size() - 1))) {
           shouldAdd = false;
           break;
         }
@@ -260,7 +260,7 @@ ArrayList<PVector> removeOverlapPoints(ArrayList<PVector> points, float brushRad
 }
 
 // Check if adding a point would create a fold-back that causes overlaps
-boolean wouldCreateFoldback(PVector prevPoint, PVector newPoint, PVector lastPoint) {
+boolean WouldCreateFoldback(PVector prevPoint, PVector newPoint, PVector lastPoint) {
   PVector v1 = PVector.sub(lastPoint, prevPoint);
   PVector v2 = PVector.sub(newPoint, prevPoint);
 
