@@ -40,7 +40,6 @@ void StartDrawing() {
   stroke.add(new PVector(mouseX, mouseY));
 }
 
-
 void FinishDrawing() {
   drawing = false;
   //create shape
