@@ -2,7 +2,7 @@
 class Shape {
   ArrayList<Point> points;  //list of points in the shape
   float strokeRadius = 10.0; // Inflation radius for stroke
-
+  boolean isClosed = true; // Whether the shape is closed
   Shape() {
     points = new ArrayList<Point>();
   }
