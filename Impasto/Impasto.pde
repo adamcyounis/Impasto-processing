@@ -10,10 +10,14 @@ PGraphics bufferTexture;
 PShader brushShader;
 PGraphics temp ;
 ArrayList<Shape> shapes;
-boolean drawing = false;
 float radius = 20;
 PVector prevMousePos;
 
+enum DrawMode {
+  Default, Drawing, Modify
+}
+
+DrawMode mode;
 void setup() {
 
   frameRate(120);
@@ -38,14 +42,19 @@ void setup() {
   // Set uniforms that NEVER change
   brushShader.set("resolution", float(width), float(height));
   brushShader.set("brushRadius", radius);
+  mode = DrawMode.Default;
 }
 
 void draw() {
   background(255);
 
-  HandleInputs();
-  HandleStroke();
+  if (mode != DrawMode.Drawing) {
+    HandleInputs();
+  }
 
+  if (mode != DrawMode.Modify) {
+    HandleStroke();
+  }
 
   pushMatrix();
   scale(zoom);
@@ -54,11 +63,8 @@ void draw() {
   DrawShapes();
   popMatrix();
 
-
-  prevMousePos = new PVector(mouseX, mouseY);
-
-
   DrawUI();
+  prevMousePos = new PVector(mouseX, mouseY);
 }
 
 void DrawShapes() {
@@ -68,25 +74,28 @@ void DrawShapes() {
 }
 
 void HandleStroke() {
-  if (!drawing) {
-    if (mousePressed && (mouseButton == LEFT)) {
+  boolean inputtingMouseDraw = mousePressed && (mouseButton == LEFT);
+  if (mode != DrawMode.Drawing) {
+    if (inputtingMouseDraw) {
       BeginStroke();
     }
   } else {
-    if (!mousePressed || (mouseButton != LEFT)) {
+    if (!inputtingMouseDraw) {
       EndStroke();
+      mode = DrawMode.Default;
     } else {
       UpdateStroke();
     }
   }
-  if (drawing) {
+
+  if (mode == DrawMode.Drawing) {
     // Display the buffer
     image(bufferTexture, 0, 0);
   }
 }
 
 void BeginStroke() {
-  drawing = true;
+  mode = DrawMode.Drawing;
 }
 
 void UpdateStroke() {
@@ -103,7 +112,7 @@ void UpdateStroke() {
 }
 
 void EndStroke() {
-  drawing = false;
+  mode = DrawMode.Default;
   ArrayList<Shape> newShapes = BitMapTrace(bufferTexture);
 
   for (int i = 0; i < newShapes.size(); i++) {
@@ -134,27 +143,46 @@ void Stamp(PVector mousePos) {
 }
 
 void HandleInputs() {
+  boolean inputtingModifier = false;
   // Placeholder for processing tablet or other inputs
   if (keyPressed) {
     if (key == '=') {
       radius += 1;
       brushShader.set("brushRadius", radius);
+      inputtingModifier = true;
     } else if (key == '-') {
       radius = max(1, radius - 1);
       brushShader.set("brushRadius", radius);
+      inputtingModifier = true;
     }
   }
 
-  if (mousePressed && (mouseButton == CENTER)) {
+  //pan view with middle mouse button or space + left mouse button
+  if (mousePressed && (mouseButton == CENTER || (key == ' ' && keyPressed))) {
     view.x += (mouseX - pmouseX) / zoom;
     view.y += (mouseY - pmouseY) / zoom;
+    inputtingModifier = true;
+  }
+
+  //adjust brush size with d + left mouse button
+  if (mousePressed && keyPressed && key == 'd') {
+    radius += (mouseX - pmouseX) * 0.5;
+    radius = max(1, radius);
+    brushShader.set("brushRadius", radius);
+    inputtingModifier = true;
+  }
+
+  if (inputtingModifier) {
+    mode = DrawMode.Modify;
+  } else {
+    mode = DrawMode.Default;
   }
 }
 
 void mouseWheel(MouseEvent event) {
   //zoom and pan towards mouse position
   float e = event.getCount();
-  float zoomFactor = 1.05;
+  float zoomFactor = 1.1;
 
   // Mouse position in world space before zoom
   float mouseWorldX = mouseX / zoom - view.x;
