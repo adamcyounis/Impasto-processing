@@ -3,10 +3,10 @@ class Shape {
   ArrayList<Point> points;  //list of points in the shape
   float strokeRadius = 10.0; // Inflation radius for stroke
   boolean isClosed = true; // Whether the shape is closed
-  PVector colour;
+  color colour;
   Shape() {
     points = new ArrayList<Point>();
-    colour = new PVector(random(255), random(255), random(255));
+    colour = color(0, 128);//new PVector(random(255), random(255), random(255));
   }
 
   void AddPoint(Point p) {
@@ -28,7 +28,7 @@ class Shape {
   void Draw() {
     if (points.size() > 2) {
       // Draw filled shape
-      fill(colour.x, colour.y, colour.z, 150);  // Semi-transparent fill
+      fill(colour);  // Semi-transparent fill
       noStroke();
 
       beginShape();
@@ -79,7 +79,7 @@ class Shape {
     }
     newShape.strokeRadius = this.strokeRadius;
     newShape.isClosed = this.isClosed;
-    newShape.colour = this.colour.copy();
+    newShape.colour = this.colour;
     return newShape;
   }
 

@@ -1,8 +1,6 @@
-/*
-import jwinpointer.JWinPointerReader;
- import jwinpointer.JWinPointerReader.PointerEventListener;
- */
+import codeanticode.tablet.*;
 
+Tablet tablet;
 PVector view;
 float zoom = 1.0;
 
@@ -10,9 +8,9 @@ PGraphics bufferTexture;
 PShader brushShader;
 PGraphics temp ;
 ArrayList<Shape> shapes;
+float pressure = 0;
 float radius = 20;
-PVector prevMousePos;
-
+float activeRadius = 20;
 enum DrawMode {
   Default, Drawing, Modify
 }
@@ -25,6 +23,7 @@ void setup() {
   //pixelDensity(2);
   //turn anti aliasing off for crisp lines
   noSmooth();
+  tablet = new Tablet(this);
 
   view = new PVector(0, 0);
   shapes = new ArrayList<Shape>();
@@ -53,23 +52,31 @@ void draw() {
   }
 
   if (mode != DrawMode.Modify) {
+    HandlePressure();
     HandleStroke();
   }
 
   pushMatrix();
   scale(zoom);
   translate(view.x, view.y);
-  DrawDebug();
   DrawShapes();
   popMatrix();
 
   DrawUI();
+  DrawDebug();
   prevMousePos = new PVector(mouseX, mouseY);
 }
 
 void DrawShapes() {
   for (Shape s : shapes) {
     s.Draw();
+  }
+}
+
+void HandlePressure() {
+  if (tablet != null && tablet.getPressure() > 0) {
+    activeRadius = map(tablet.getPressure(), 0, 1, 1, radius);
+    brushShader.set("brushRadius", activeRadius);
   }
 }
 
@@ -135,69 +142,12 @@ void Stamp(PVector mousePos) {
   float y = height -mousePos.y;
   brushShader.set("mousePos", x, y);
   brushShader.set("bufferTexture", bufferTexture);
-
   temp.beginDraw();
   temp.shader(brushShader);
   temp.rect(0, 0, width, height);
   temp.endDraw();
 }
 
-void HandleInputs() {
-  boolean inputtingModifier = false;
-  // Placeholder for processing tablet or other inputs
-  if (keyPressed) {
-    if (key == '=') {
-      radius += 1;
-      brushShader.set("brushRadius", radius);
-      inputtingModifier = true;
-    } else if (key == '-') {
-      radius = max(1, radius - 1);
-      brushShader.set("brushRadius", radius);
-      inputtingModifier = true;
-    }
-  }
-
-  //pan view with middle mouse button or space + left mouse button
-  if (mousePressed && (mouseButton == CENTER || (key == ' ' && keyPressed))) {
-    view.x += (mouseX - pmouseX) / zoom;
-    view.y += (mouseY - pmouseY) / zoom;
-    inputtingModifier = true;
-  }
-
-  //adjust brush size with d + left mouse button
-  if (mousePressed && keyPressed && key == 'd') {
-    radius += (mouseX - pmouseX) * 0.5;
-    radius = max(1, radius);
-    brushShader.set("brushRadius", radius);
-    inputtingModifier = true;
-  }
-
-  if (inputtingModifier) {
-    mode = DrawMode.Modify;
-  } else {
-    mode = DrawMode.Default;
-  }
-}
-
-void mouseWheel(MouseEvent event) {
-  //zoom and pan towards mouse position
-  float e = event.getCount();
-  float zoomFactor = 1.1;
-
-  // Mouse position in world space before zoom
-  float mouseWorldX = mouseX / zoom - view.x;
-  float mouseWorldY = mouseY / zoom - view.y;
-
-  if (e > 0) {
-    zoom /= pow(zoomFactor, e);
-  } else if (e < 0) {
-    zoom *= pow(zoomFactor, -e);
-  }
-
-  // Keep the same world point under the mouse after zoom
-  view.x = mouseX / zoom - mouseWorldX;
-  view.y = mouseY / zoom - mouseWorldY;
-}
 
 void DrawUI() {
   fill(0);
@@ -207,6 +157,11 @@ void DrawUI() {
   text("Zoom: " + nf(zoom, 1, 2) + "(Use mouse wheel to zoom)", 10, height - 30);
   //display view
   text("View: (" + nf(view.x, 1, 2) + ", " + nf(view.y, 1, 2) + ") (Use middle mouse button to pan)", 10, height - 50);
+
+  //log pen pressure
+  if (tablet != null) {
+    text("Pen Pressure: " + nf(tablet.getPressure(), 1, 2), 10, height - 70);
+  }
 }
 
 
@@ -216,4 +171,14 @@ void DrawDebug() {
   stroke(0, 255, 0);
   line(-10, 0, 10, 0);
   line(0, -10, 0, 10);
+
+  //draw tablet pressure as a circle at mouse position
+}
+
+PVector ScreenToWorld(PVector screenPos) {
+  return new PVector(screenPos.x / zoom - view.x, screenPos.y / zoom - view.y);
+}
+
+PVector WorldToScreen(PVector worldPos) {
+  return new PVector((worldPos.x + view.x) * zoom, (worldPos.y + view.y) * zoom);
 }

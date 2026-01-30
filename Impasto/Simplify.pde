@@ -14,8 +14,6 @@ Shape Simplify(Shape input, float tolerance) {
   //if a point is within the tolerance, remove it
   // when all points have been processed, return the simplified Path
   output.points = oPoints;
-  println("Simplified from " + iPoints.size() + " to " + output.points.size());
-
   return output;
 }
 
