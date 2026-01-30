@@ -7,10 +7,12 @@ float zoom = 1.0;
 PGraphics bufferTexture;
 PShader brushShader;
 PGraphics temp ;
-ArrayList<Shape> shapes;
 float pressure = 0;
 float radius = 20;
 float activeRadius = 20;
+History history;
+KeyboardInput keys;
+
 enum DrawMode {
   Default, Drawing, Modify
 }
@@ -19,14 +21,16 @@ DrawMode mode;
 void setup() {
 
   frameRate(120);
-  size(700, 700, P2D);
+  size(1280, 720, P2D);
   //pixelDensity(2);
   //turn anti aliasing off for crisp lines
   noSmooth();
   tablet = new Tablet(this);
 
+  keys = new KeyboardInput();
   view = new PVector(0, 0);
-  shapes = new ArrayList<Shape>();
+  history = new History();
+  history.AddState(new Canvas());
 
   // Create offscreen buffer
   temp = createGraphics(width, height, P2D);
@@ -68,7 +72,7 @@ void draw() {
 }
 
 void DrawShapes() {
-  for (Shape s : shapes) {
+  for (Shape s : history.GetCurrent().shapes) {
     s.Draw();
   }
 }
@@ -127,13 +131,15 @@ void EndStroke() {
     newShapes.set(i, Simplify(s, 1) );
     newShapes.get(i).RescaleToView();
   }
-
-  shapes.addAll(newShapes);
+  Canvas canvas = GetCanvas().Clone();
+  canvas.shapes.addAll(newShapes);
 
   //clear the buffer texture
   bufferTexture.beginDraw();
   bufferTexture.background(255);
   bufferTexture.endDraw();
+  history.AddState(canvas);
+  println("Added new shape, total shapes: " + canvas.shapes.size());
   //convert the bitmap into a vector shape;
 }
 
@@ -180,5 +186,10 @@ PVector ScreenToWorld(PVector screenPos) {
 }
 
 PVector WorldToScreen(PVector worldPos) {
+
   return new PVector((worldPos.x + view.x) * zoom, (worldPos.y + view.y) * zoom);
+}
+
+Canvas GetCanvas() {
+  return history.GetCurrent();
 }

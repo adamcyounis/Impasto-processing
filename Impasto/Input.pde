@@ -24,6 +24,7 @@ void HandleInputs() {
     }
   }
 
+
   //pan view with middle mouse button or space + left mouse button
   if (mousePressed && (mouseButton == CENTER || (key == ' ' && keyPressed))) {
     view.x += (mouseX - pmouseX) / zoom;
@@ -72,4 +73,18 @@ void AdjustZoomAtPosition(PVector screenPos, float amount) {
   // Keep the same world point under the screenPos after zoom
   view.x = screenPos.x / zoom - mouseWorldX;
   view.y = screenPos.y / zoom - mouseWorldY;
+}
+
+boolean controlDown = false;
+boolean shiftDown = false;
+
+void keyPressed() {
+  keys.Add(key);
+  keys.Add(keyCode);
+  history.CheckUndoRedoKeys();
+}
+
+void keyReleased() {
+  keys.Remove(key);
+  keys.Remove(keyCode);
 }
