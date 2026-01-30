@@ -34,4 +34,15 @@ class Point {
     point(leftCP.x, leftCP.y);
     point(rightCP.x, rightCP.y);
   }
+
+  void RescaleToView(PVector view, float zoom) {
+    pos.div(zoom);
+    pos.sub(view);
+
+    leftCP.div(zoom);
+    leftCP.sub(view);
+
+    rightCP.div(zoom);
+    rightCP.sub(view);
+  }
 }

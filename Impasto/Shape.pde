@@ -3,8 +3,10 @@ class Shape {
   ArrayList<Point> points;  //list of points in the shape
   float strokeRadius = 10.0; // Inflation radius for stroke
   boolean isClosed = true; // Whether the shape is closed
+  PVector colour;
   Shape() {
     points = new ArrayList<Point>();
+    colour = new PVector(random(255), random(255), random(255));
   }
 
   void AddPoint(Point p) {
@@ -26,7 +28,7 @@ class Shape {
   void Draw() {
     if (points.size() > 2) {
       // Draw filled shape
-      fill(200, 100, 100, 150);  // Semi-transparent fill
+      fill(colour.x, colour.y, colour.z, 150);  // Semi-transparent fill
       noStroke();
 
       beginShape();
@@ -46,24 +48,6 @@ class Shape {
       }
 
       endShape(CLOSE);
-
-      // Optionally draw control points for editing
-      for (Point p : points) {
-        p.Draw(false);
-      }
-    } else {
-      // Fallback for shapes with fewer points
-      for (int i = 0; i < points.size(); i++) {
-        Point p0 = points.get(i);
-        Point p1 = points.get((i + 1) % points.size());
-
-        //draw bezier curve from p0 to p1
-        noFill();
-        stroke(0);
-        strokeWeight(2);
-        p0.Draw(false);
-        p1.Draw(false);
-      }
     }
   }
 
@@ -82,6 +66,26 @@ class Shape {
       //set left and right control points
       p1.leftCP = PVector.sub(p1.pos, dir);
       p1.rightCP = PVector.add(p1.pos, dir);
+    }
+  }
+
+  Shape Clone() {
+    Shape newShape = new Shape();
+    for (Point p : points) {
+      Point newPoint = new Point(p.pos.x, p.pos.y);
+      newPoint.leftCP = p.leftCP.copy();
+      newPoint.rightCP = p.rightCP.copy();
+      newShape.AddPoint(newPoint);
+    }
+    newShape.strokeRadius = this.strokeRadius;
+    newShape.isClosed = this.isClosed;
+    newShape.colour = this.colour.copy();
+    return newShape;
+  }
+
+  void RescaleToView() {
+    for (Point p : points) {
+      p.RescaleToView(view, zoom);
     }
   }
 }
