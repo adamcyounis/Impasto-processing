@@ -12,7 +12,7 @@ float radius = 20;
 float activeRadius = 20;
 History history;
 KeyboardInput keys;
-
+boolean debugging;
 enum DrawMode {
   Default, Drawing, Modify
 }
@@ -74,6 +74,9 @@ void draw() {
 void DrawShapes() {
   for (Shape s : history.GetCurrent().shapes) {
     s.Draw();
+    if (debugging) {
+      s.DrawDebug();
+    }
   }
 }
 
@@ -128,7 +131,7 @@ void EndStroke() {
 
   for (int i = 0; i < newShapes.size(); i++) {
     Shape s = newShapes.get(i);
-    newShapes.set(i, Simplify(s, 1) );
+    newShapes.set(i, Simplify(s, 2f) );
     newShapes.get(i).RescaleToView();
   }
   Canvas canvas = GetCanvas().Clone();
@@ -168,6 +171,11 @@ void DrawUI() {
   if (tablet != null) {
     text("Pen Pressure: " + nf(tablet.getPressure(), 1, 2), 10, height - 70);
   }
+
+  //draw a stroke preview circle at mouse position of radius size in screen space
+  noFill();
+  stroke(0);
+  ellipse(mouseX, mouseY, radius*2, radius*2);
 }
 
 
@@ -193,3 +201,4 @@ PVector WorldToScreen(PVector worldPos) {
 Canvas GetCanvas() {
   return history.GetCurrent();
 }
+

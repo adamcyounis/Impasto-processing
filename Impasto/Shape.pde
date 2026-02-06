@@ -51,6 +51,16 @@ class Shape {
     }
   }
 
+  void DrawDebug() {
+    //for every point in shape
+    for (Point p : points) {
+      //draw a red circle at point
+      fill(255, 0, 0);
+      noStroke();
+      ellipse(p.pos.x, p.pos.y, 5 / zoom, 5/zoom);
+    }
+  }
+
   void RelaxControlPoints() {
     //relax the control points of all points in the shape
     for (int i = 0; i < points.size(); i++) {

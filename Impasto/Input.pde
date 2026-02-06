@@ -3,6 +3,7 @@ PVector mouseDownWorldPos;
 PVector prevMousePos;
 
 void HandleInputs() {
+  debugging = false;
 
   boolean inputtingModifier = false;
   // Placeholder for processing tablet or other inputs
@@ -21,6 +22,10 @@ void HandleInputs() {
       float zoomAmount = ( pmouseY - mouseY ) * 0.2f;
       AdjustZoomAtPosition(WorldToScreen(mouseDownWorldPos), zoomAmount);
       inputtingModifier = true;
+    }
+
+    if (key == '`') {
+      debugging = true;
     }
   }
 
