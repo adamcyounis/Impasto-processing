@@ -10,7 +10,7 @@ PGraphics temp ;
 float pressure = 0;
 float radius = 20;
 float activeRadius = 20;
-History history;
+static History history;
 KeyboardInput keys;
 boolean debugging;
 enum DrawMode {
@@ -130,7 +130,7 @@ void UpdateStroke() {
 
 void EndStroke() {
   mode = DrawMode.Default;
-  Shape newShape = BitMapTrace(bufferTexture);
+  Shape newShape = new BitMapTrace(bufferTexture).shape.Clone();
 
   for (int i = 0; i < newShape.chains.size(); i++) {
     Chain c = newShape.chains.get(i);
@@ -145,7 +145,6 @@ void EndStroke() {
   bufferTexture.background(255);
   bufferTexture.endDraw();
   history.AddState(canvas);
-  println("Added new shape, total shapes: " + canvas.shapes.size());
   //convert the bitmap into a vector shape;
 }
 
@@ -162,23 +161,34 @@ void Stamp(PVector mousePos) {
 
 
 void DrawUI() {
+
+  ArrayList<String> logs = new ArrayList<String>();
+
   fill(0);
   textSize(16);
-  text("Brush Radius: " + nf(radius, 1, 2) + " (Use + / - to adjust)", 10, height - 10);
+  logs.add("Brush Radius: " + nf(radius, 1, 2) + " (Use + / - to adjust)");
   //display zoom level
-  text("Zoom: " + nf(zoom, 1, 2) + "(Use mouse wheel to zoom)", 10, height - 30);
+  logs.add("Zoom: " + nf(zoom, 1, 2) + "(Use mouse wheel to zoom)");
   //display view
-  text("View: (" + nf(view.x, 1, 2) + ", " + nf(view.y, 1, 2) + ") (Use middle mouse button to pan)", 10, height - 50);
+  logs.add("View: (" + nf(view.x, 1, 2) + ", " + nf(view.y, 1, 2) + ") (Use middle mouse button to pan)");
 
   //log pen pressure
   if (tablet != null) {
-    text("Pen Pressure: " + nf(tablet.getPressure(), 1, 2), 10, height - 70);
+    logs.add("Pen Pressure: " + nf(tablet.getPressure(), 1, 2));
   }
+
+  logs.add("Canvas Chains: " + GetCanvas().chains.size());
+  logs.add("Canvas Shapes: " + GetCanvas().shapes.size());
+  logs.add("Debug Mode: " + (debugging ? "ON" : "OFF") + " (Press ` to toggle)");
 
   //draw a stroke preview circle at mouse position of radius size in screen space
   noFill();
   stroke(0);
   ellipse(mouseX, mouseY, radius*2, radius*2);
+
+  for (int i = 0; i < logs.size(); i++) {
+    text(logs.get(i), 10, height - 10 - i * 20);
+  }
 }
 
 
@@ -201,6 +211,6 @@ PVector WorldToScreen(PVector worldPos) {
   return new PVector((worldPos.x + view.x) * zoom, (worldPos.y + view.y) * zoom);
 }
 
-Canvas GetCanvas() {
+static Canvas GetCanvas() {
   return history.GetCurrent();
 }

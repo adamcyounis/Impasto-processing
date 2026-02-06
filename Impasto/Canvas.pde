@@ -11,6 +11,9 @@ class Canvas {
     for (Shape s : shapes) {
       newCanvas.shapes.add(s.Clone());
     }
+    for (Chain c : chains) {
+      newCanvas.chains.add(c.Clone());
+    }
     return newCanvas;
   }
 }
