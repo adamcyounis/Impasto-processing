@@ -10,3 +10,5 @@
 - Shapes can have a list of contours, but never need to nest within each other. Simply a flat data structure.
 - Contours are always considered "negative space" within the shape they belong to
 - Edge chains are stored "by reference" in the application, such that modifying an edge will cause any shapes that use it to have their appearance affected.
+
+Look up Avalonia 

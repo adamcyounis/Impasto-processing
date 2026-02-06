@@ -51,6 +51,7 @@ void setup() {
 void draw() {
   background(255);
 
+
   if (mode != DrawMode.Drawing) {
     HandleInputs();
   }
@@ -135,7 +136,14 @@ void EndStroke() {
   for (int i = 0; i < newShape.chains.size(); i++) {
     Chain c = newShape.chains.get(i);
     Simplify(c, 2f);
-    newShape.chains.get(i).RescaleToView();
+    if (c.points.size() < 4) {
+      newShape.chains.remove(i);
+      i--;
+      continue;
+    }
+
+    c.RescaleToView();
+    GetCanvas().chains.add(c);
   }
   Canvas canvas = GetCanvas().Clone();
   canvas.shapes.add(newShape);

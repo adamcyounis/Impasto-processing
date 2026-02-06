@@ -1,25 +1,33 @@
 void Simplify(Chain input, float tolerance) {
 
-  //take a Shape.
-  //start at the first and last points, and recursively find the point furthest from the line segment between them.
-  ArrayList<Point> iPoints = input.points;
 
+  if (input.points.size() <= 2) {
+    return; // Nothing to simplify
+  }
+
+  // Track which indices to keep
+  boolean[] keepIndex = new boolean[input.points.size()];
+  keepIndex[0] = true;
+  keepIndex[input.points.size() - 1] = true;
+
+  FindExtremities(0, input.points.size() - 1, input.points, keepIndex, tolerance);
+
+  // Build output list from kept indices
   ArrayList<Point> oPoints = new ArrayList<Point>();
-  oPoints.add(iPoints.get(0));
-  //oPoints.add(iPoints.get(iPoints.size()-1));
-  FindExtremities(0, iPoints.size()-1, iPoints, oPoints, tolerance);
-
-  //if that point is further than the tolerance, keep it, and recurse on the two segments
-  //if a point is within the tolerance, remove it
-  // when all points have been processed, return the simplified Path
+  for (int i = 0; i < input.points.size(); i++) {
+    if (keepIndex[i]) {
+      oPoints.add(input.points.get(i));
+    }
+  }
   input.points = oPoints;
 }
 
-ArrayList<Point> FindExtremities(int startIndex, int endIndex, ArrayList<Point> iPoints, ArrayList<Point> oPoints, float tolerance) {
+void FindExtremities(int startIndex, int endIndex, ArrayList<Point> iPoints, boolean[] keepIndex, float tolerance) {
 
   float maxDist = 0;
   int furthestIndex = -1;
 
+  // Find the point furthest from the line segment
   for (int i = startIndex + 1; i < endIndex; i++) {
     Point p = iPoints.get(i);
     float dist = DistToSegment(iPoints.get(startIndex).pos, iPoints.get(endIndex).pos, p.pos);
@@ -29,34 +37,15 @@ ArrayList<Point> FindExtremities(int startIndex, int endIndex, ArrayList<Point> 
     }
   }
 
-  //early return if we didn't find anything far enough.
-  if (maxDist < tolerance || furthestIndex == -1) {
-    return oPoints;
+  // If furthest point is beyond tolerance, keep it and recurse on both segments
+  if (maxDist >= tolerance && furthestIndex != -1) {
+    keepIndex[furthestIndex] = true;
+
+    // Recurse on the two segments created by this point
+    FindExtremities(startIndex, furthestIndex, iPoints, keepIndex, tolerance);
+    FindExtremities(furthestIndex, endIndex, iPoints, keepIndex, tolerance);
   }
-
-  //add the furthest that we found, which necessarily was further than the tolerance
-  //insertion sort to keep order
-  boolean added = false;
-
-  if (!added) {
-    for (int i = 0; i < oPoints.size(); i++) {
-      if (furthestIndex < iPoints.indexOf(oPoints.get(i))) {
-        oPoints.add(i, iPoints.get(furthestIndex));
-        added = true;
-        break;
-      }
-    }
-  }
-
-  if (!added) {
-    oPoints.add(iPoints.get(furthestIndex));
-    added = true;
-  }
-
-  //split the two lists either side of the furthest point, and recurse
-  FindExtremities(startIndex, furthestIndex, iPoints, oPoints, tolerance);
-  FindExtremities(furthestIndex, endIndex, iPoints, oPoints, tolerance);
-  return oPoints;
+  // Otherwise, all points between start and end are within tolerance - discard them
 }
 
 public float DistToSegment(PVector a, PVector b, PVector x) {

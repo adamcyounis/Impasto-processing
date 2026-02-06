@@ -4,15 +4,17 @@ class BitMapTrace {
   IntVector startPos;
   boolean[][] visited;
   IntVector searchPos;
+
   BitMapTrace(PGraphics bitmap_) {
     bitmap = bitmap_;
     visited = new boolean[bitmap.height][bitmap.width];
+    searchPos = new IntVector(0, 0); // Initialize search position once
     shape = Trace();
   }
 
   Shape Trace() {
     bitmap.loadPixels();
-    Shape s = new Shape();
+    shape = new Shape();
 
     // Scan through bitmap once, continuing from last position
     boolean hasMoreEdges = true;
@@ -20,7 +22,7 @@ class BitMapTrace {
     while (hasMoreEdges) {
       // Find next unvisited edge pixel, continuing from last position
       startPos = new IntVector(-1, -1);
-      searchPos = new IntVector(0, 0);
+      // Don't reset searchPos here - it should persist across iterations!
 
       boolean edgeFound = false;
 
@@ -30,6 +32,8 @@ class BitMapTrace {
 
         for (int x = startX; x < bitmap.width - 1; x++) {
           if (isEdge(x, y)) {
+
+            //print the colour of the pixel
             startPos.x = x;
             startPos.y = y;
             edgeFound = true;
@@ -40,19 +44,19 @@ class BitMapTrace {
       }
 
       // Check if we found an edge
-      if (!edgeFound) {
-        hasMoreEdges = false;
-      } else {
+      if (edgeFound) {
         Chain tracedPath = TraceChain(startPos);
 
-        if (tracedPath.NumPoints() > 3) {
-          GetCanvas().chains.add(tracedPath);
-          s.chains.add(tracedPath);
+        if (tracedPath.NumPoints() > 10) {
+          println("Traced chain with " + tracedPath.NumPoints() + " points");
+          shape.chains.add(tracedPath);
         }
+      } else {
+        hasMoreEdges = false;
       }
     }
 
-    return s;
+    return shape;
   }
 
   void IncrementSearch() {
@@ -67,15 +71,12 @@ class BitMapTrace {
   }
 
   Chain TraceChain(IntVector start) {
-    // Walk the boundary
-    Chain tracedPath = new Chain();
-
-    // Store original starting position
 
     // Current position
     IntVector current = new IntVector(start.x, start.y);
     int dir = 0; // Direction we're facing
 
+    Chain tracedPath = new Chain();
     tracedPath.AddPoint(current.x, current.y);
     visited[current.y][current.x] = true;
 
@@ -107,17 +108,36 @@ class BitMapTrace {
 
   int[] FindNextNeighbour(IntVector pos, int dir) {
     // Moore-neighbor directions: N, NE, E, SE, S, SW, W, NW
-    int[] dx = {0, 1, 1, 1, 0, -1, -1, -1};
-    int[] dy = {-1, -1, 0, 1, 1, 1, 0, -1};
+    IntVector[] directions = new IntVector[8];
+    directions[0] = new IntVector(0, -1);   // N
+    directions[1] = new IntVector(1, -1);   // NE
+    directions[2] = new IntVector(1, 0);    // E
+    directions[3] = new IntVector(1, 1);    // SE
+    directions[4] = new IntVector(0, 1);    // S
+    directions[5] = new IntVector(-1, 1);   // SW
+    directions[6] = new IntVector(-1, 0);   // W
+    directions[7] = new IntVector(-1, -1);  // NW
 
     // Check neighbors clockwise
     for (int i = 0; i < 8; i++) {
       int checkDir = (dir + i) % 8;
-      int nx = pos.x + dx[checkDir];
-      int ny = pos.y + dy[checkDir];
+      int nx = pos.x + directions[checkDir].x;
+      int ny = pos.y + directions[checkDir].y;
 
       if (isEdge(nx, ny)) {
         int newDir = (checkDir + 6) % 8; // Turn left for next search
+
+        // If moving diagonally (odd direction), also mark the clockwise-adjacent cardinal neighbor as visited
+        if (checkDir % 2 == 1) {
+          int cardinalDir = (checkDir + 1) % 8; // Next clockwise direction
+          int adjX = pos.x + directions[cardinalDir].x;
+          int adjY = pos.y + directions[cardinalDir].y;
+
+          if (adjX >= 0 && adjX < bitmap.width && adjY >= 0 && adjY < bitmap.height) {
+            visited[adjY][adjX] = true;
+          }
+        }
+
         return new int[]{nx, ny, newDir}; // Return new position and direction
       }
     }
@@ -131,8 +151,10 @@ class BitMapTrace {
     int index = y * bitmap.width + x;
     //check if already visited
     if (visited[y][x]) return false;
+
+    boolean rightEdge = (bitmap.pixels[index] != bitmap.pixels[index + 1]);
+    boolean downEdge = (bitmap.pixels[index] != bitmap.pixels[index + bitmap.width]);
     //return true if any neighbor pixel is different
-    return bitmap.pixels[index] != bitmap.pixels[index + 1] ||
-      bitmap.pixels[index] != bitmap.pixels[index + bitmap.width];
+    return rightEdge || downEdge;
   }
 }

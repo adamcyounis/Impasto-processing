@@ -1,6 +1,6 @@
 class Chain {
   ArrayList<Point> points;  //list of points in the shape
-
+  color debugColour = color(random(255), random(255), random(255));
   Chain() {
     points = new ArrayList<Point>();
   }
@@ -47,11 +47,21 @@ class Chain {
   }
   void DrawDebug() {
     //for every point in shape
-    for (Point p : points) {
+    for (int i = 0; i < points.size(); i++) {
+      Point p = points.get(i);
       //draw a red circle at point
-      fill(255, 0, 0);
+      if (i == 0) {
+        fill(255);
+      } else {
+        fill(debugColour);
+      }
       noStroke();
       ellipse(p.pos.x, p.pos.y, 5 / zoom, 5/zoom);
+      //line between points
+      Point next = points.get((i + 1) % points.size());
+      strokeWeight(1/zoom);
+      stroke(debugColour);
+      line(p.pos.x, p.pos.y, next.pos.x, next.pos.y);
     }
   }
 

@@ -23,12 +23,11 @@ void HandleInputs() {
       AdjustZoomAtPosition(WorldToScreen(mouseDownWorldPos), zoomAmount);
       inputtingModifier = true;
     }
-
-    if (key == '`') {
-      debugging = true;
-    }
   }
 
+  //if (key == '`') {
+  debugging = true;
+  //}
 
   //pan view with middle mouse button or space + left mouse button
   if (mousePressed && (mouseButton == CENTER || (key == ' ' && keyPressed))) {
