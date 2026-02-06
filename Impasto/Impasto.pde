@@ -74,8 +74,11 @@ void draw() {
 void DrawShapes() {
   for (Shape s : history.GetCurrent().shapes) {
     s.Draw();
-    if (debugging) {
-      s.DrawDebug();
+  }
+
+  if (debugging) {
+    for (Chain c : history.GetCurrent().chains) {
+      c.DrawDebug();
     }
   }
 }
@@ -127,15 +130,15 @@ void UpdateStroke() {
 
 void EndStroke() {
   mode = DrawMode.Default;
-  ArrayList<Shape> newShapes = BitMapTrace(bufferTexture);
+  Shape newShape = BitMapTrace(bufferTexture);
 
-  for (int i = 0; i < newShapes.size(); i++) {
-    Shape s = newShapes.get(i);
-    newShapes.set(i, Simplify(s, 2f) );
-    newShapes.get(i).RescaleToView();
+  for (int i = 0; i < newShape.chains.size(); i++) {
+    Chain c = newShape.chains.get(i);
+    Simplify(c, 2f);
+    newShape.chains.get(i).RescaleToView();
   }
   Canvas canvas = GetCanvas().Clone();
-  canvas.shapes.addAll(newShapes);
+  canvas.shapes.add(newShape);
 
   //clear the buffer texture
   bufferTexture.beginDraw();
@@ -201,4 +204,3 @@ PVector WorldToScreen(PVector worldPos) {
 Canvas GetCanvas() {
   return history.GetCurrent();
 }
-

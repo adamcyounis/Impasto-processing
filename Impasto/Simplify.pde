@@ -1,5 +1,4 @@
-Shape Simplify(Shape input, float tolerance) {
-  Shape output = input.Clone();
+void Simplify(Chain input, float tolerance) {
 
   //take a Shape.
   //start at the first and last points, and recursively find the point furthest from the line segment between them.
@@ -13,8 +12,7 @@ Shape Simplify(Shape input, float tolerance) {
   //if that point is further than the tolerance, keep it, and recurse on the two segments
   //if a point is within the tolerance, remove it
   // when all points have been processed, return the simplified Path
-  output.points = oPoints;
-  return output;
+  input.points = oPoints;
 }
 
 ArrayList<Point> FindExtremities(int startIndex, int endIndex, ArrayList<Point> iPoints, ArrayList<Point> oPoints, float tolerance) {

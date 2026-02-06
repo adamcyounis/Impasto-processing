@@ -1,7 +1,9 @@
 class Canvas {
   ArrayList<Shape> shapes;
+  ArrayList<Chain> chains;
   Canvas() {
     shapes = new ArrayList<Shape>();
+    chains = new ArrayList<Chain>();
   }
 
   Canvas Clone() {

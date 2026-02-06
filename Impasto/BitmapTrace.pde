@@ -1,6 +1,6 @@
-ArrayList<Shape> BitMapTrace(PGraphics bitmap) {
+Shape BitMapTrace(PGraphics bitmap) {
   bitmap.loadPixels();
-  ArrayList<Shape> shapes = new ArrayList<Shape>();
+  Shape s = new Shape();
   boolean[] visited = new boolean[bitmap.width * bitmap.height];
 
   // Find all shapes by scanning for unvisited edges
@@ -20,7 +20,7 @@ ArrayList<Shape> BitMapTrace(PGraphics bitmap) {
     if (startX == -1) break; // No more edges found
 
     // Walk the boundary
-    Shape tracedPath = new Shape();
+    Chain tracedPath = new Chain();
     int x = startX, y = startY;
     int dir = 0; // Direction we're facing
     tracedPath.AddPoint(x, y);
@@ -51,12 +51,14 @@ ArrayList<Shape> BitMapTrace(PGraphics bitmap) {
       if (!found) break;
     } while (x != startX || y != startY);
 
-    if (tracedPath.points.size() > 3) {
-      shapes.add(tracedPath);
+    if (tracedPath.NumPoints() > 3) {
+      println("get canvas chains is " + GetCanvas().chains.size());
+      GetCanvas().chains.add(tracedPath);
+      s.chains.add(tracedPath);
     }
   }
 
-  return shapes;
+  return s;
 }
 
 boolean isEdge(PGraphics bitmap, int x, int y, boolean[] visited) {
