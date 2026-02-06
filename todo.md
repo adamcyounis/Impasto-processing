@@ -3,6 +3,15 @@
 - [ ] Unify shapes of the same colour drawn on top of each other
 - [ ] Detect holes in shapes rather than just resolving outlines
 
+- [ ] add colour selectors
+- [ ] add palette
+- [ ] add fill / ink drop
+- [ ] add marquee selection and cutting/ slicing
+- [ ] add selection and dragging
+- [ ] add control point modification
+- [ ] primitive shapes
+- [ ] image import? 
+- [ ] text support?
 
 ## contour data structure rationalisation
 - Shapes contain a bounding edge chain that forms the perimeter

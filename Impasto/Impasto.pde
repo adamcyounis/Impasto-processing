@@ -142,6 +142,7 @@ void EndStroke() {
       continue;
     }
 
+    Smoothen(c);
     c.RescaleToView();
     GetCanvas().chains.add(c);
   }

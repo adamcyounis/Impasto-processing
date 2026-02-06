@@ -19,18 +19,17 @@ class Point {
 
   void Draw(boolean showControlPoints) {
     //draw the point and its control points
-    stroke(0);
-    strokeWeight(1);
+    strokeWeight(1/zoom);
     point(pos.x, pos.y);
 
     if (!showControlPoints) {
       return;
     }
-    strokeWeight(1);
+
+    stroke(255, 0, 0);
     line(pos.x, pos.y, leftCP.x, leftCP.y);
     line(pos.x, pos.y, rightCP.x, rightCP.y);
 
-    strokeWeight(1);
     point(leftCP.x, leftCP.y);
     point(rightCP.x, rightCP.y);
   }

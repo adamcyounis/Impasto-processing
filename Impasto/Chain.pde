@@ -35,7 +35,6 @@ class Chain {
       for (int i = 0; i < points.size(); i++) {
         Point p0 = points.get(i);
         Point p1 = points.get((i + 1) % points.size());
-
         // Add bezier vertex from p0 to p1
         bezierVertex(p0.rightCP.x, p0.rightCP.y,
           p1.leftCP.x, p1.leftCP.y,
@@ -56,12 +55,7 @@ class Chain {
         fill(debugColour);
       }
       noStroke();
-      ellipse(p.pos.x, p.pos.y, 5 / zoom, 5/zoom);
-      //line between points
-      Point next = points.get((i + 1) % points.size());
-      strokeWeight(1/zoom);
-      stroke(debugColour);
-      line(p.pos.x, p.pos.y, next.pos.x, next.pos.y);
+      p.Draw(true);
     }
   }
 

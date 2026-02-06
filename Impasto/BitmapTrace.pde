@@ -48,7 +48,6 @@ class BitMapTrace {
         Chain tracedPath = TraceChain(startPos);
 
         if (tracedPath.NumPoints() > 10) {
-          println("Traced chain with " + tracedPath.NumPoints() + " points");
           shape.chains.add(tracedPath);
         }
       } else {

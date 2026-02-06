@@ -3,9 +3,13 @@ PVector mouseDownWorldPos;
 PVector prevMousePos;
 
 void HandleInputs() {
-  debugging = false;
 
   boolean inputtingModifier = false;
+
+  debugging = false;
+  if (keys.Contains('`')) {
+    debugging =true;
+  }
   // Placeholder for processing tablet or other inputs
   if (keyPressed) {
     if (key == '=') {
@@ -25,9 +29,7 @@ void HandleInputs() {
     }
   }
 
-  //if (key == '`') {
-  debugging = true;
-  //}
+
 
   //pan view with middle mouse button or space + left mouse button
   if (mousePressed && (mouseButton == CENTER || (key == ' ' && keyPressed))) {
