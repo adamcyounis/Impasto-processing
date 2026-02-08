@@ -38,12 +38,14 @@ void FindExtremities(int startIndex, int endIndex, ArrayList<Point> iPoints, boo
   }
 
   // If furthest point is beyond tolerance, keep it and recurse on both segments
-  if (maxDist >= tolerance && furthestIndex != -1) {
-    keepIndex[furthestIndex] = true;
+  if (furthestIndex != -1) {
+    if (maxDist >= tolerance ) {
+      keepIndex[furthestIndex] = true;
 
-    // Recurse on the two segments created by this point
-    FindExtremities(startIndex, furthestIndex, iPoints, keepIndex, tolerance);
-    FindExtremities(furthestIndex, endIndex, iPoints, keepIndex, tolerance);
+      // Recurse on the two segments created by this point
+      FindExtremities(startIndex, furthestIndex, iPoints, keepIndex, tolerance);
+      FindExtremities(furthestIndex, endIndex, iPoints, keepIndex, tolerance);
+    }
   }
   // Otherwise, all points between start and end are within tolerance - discard them
 }
@@ -61,4 +63,38 @@ public float DistToSegment(PVector a, PVector b, PVector x) {
 
   PVector projection = PVector.add(a, PVector.mult(ab, t));
   return PVector.dist(x, projection);
+}
+
+
+void DrawSimplifyUnitTest() {
+  //create a shape with 3 points
+  Chain chain = new Chain();
+
+  float margin = 100;
+  float baseLine = height/2f;
+  float penultimate = height/3;
+
+  PVector ap = new PVector(margin, baseLine);
+  PVector bp = new PVector(width*0.33f, penultimate);
+  PVector cp = new PVector(width*0.66f, height/4);
+  PVector dp = new PVector(width-margin, baseLine);
+
+  Point a = new Point(ap.x, ap.y);
+  Point b = new Point(bp.x, bp.y);
+  Point c = new Point(cp.x, cp.y);
+  Point d = new Point(dp.x, dp.y);
+
+  chain.points.add(a);
+  chain.points.add(b);
+  chain.points.add(c);
+  chain.points.add(d);
+
+  Simplify(chain, baseLine - penultimate );
+  Smoothen(chain);
+  chain.Draw();
+
+  stroke(255, 0, 0);
+  for (Point p : chain.points) {
+    p.Draw(true);
+  }
 }

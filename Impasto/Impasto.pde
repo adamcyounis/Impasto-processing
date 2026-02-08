@@ -49,8 +49,12 @@ void setup() {
 }
 
 void draw() {
-  background(255);
+  //DrawSimplifyUnitTest();
+  DrawApplication();
+}
 
+void DrawApplication() {
+  background(255);
 
   if (mode != DrawMode.Drawing) {
     HandleInputs();

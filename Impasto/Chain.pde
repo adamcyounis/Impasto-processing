@@ -36,8 +36,8 @@ class Chain {
         Point p0 = points.get(i);
         Point p1 = points.get((i + 1) % points.size());
         // Add bezier vertex from p0 to p1
-        bezierVertex(p0.rightCP.x, p0.rightCP.y,
-          p1.leftCP.x, p1.leftCP.y,
+        bezierVertex(p0.rc.x, p0.rc.y,
+          p1.lc.x, p1.lc.y,
           p1.pos.x, p1.pos.y);
       }
 
@@ -72,8 +72,8 @@ class Chain {
       dir.mult(PVector.dist(p1.pos, p0.pos) / 3.0);
 
       //set left and right control points
-      p1.leftCP = PVector.sub(p1.pos, dir);
-      p1.rightCP = PVector.add(p1.pos, dir);
+      p1.lc = PVector.sub(p1.pos, dir);
+      p1.rc = PVector.add(p1.pos, dir);
     }
   }
 
@@ -81,8 +81,8 @@ class Chain {
     Chain newChain = new Chain();
     for (Point p : points) {
       Point newPoint = new Point(p.pos.x, p.pos.y);
-      newPoint.leftCP = p.leftCP.copy();
-      newPoint.rightCP = p.rightCP.copy();
+      newPoint.lc = p.lc.copy();
+      newPoint.rc = p.rc.copy();
       newChain.AddPoint(newPoint);
     }
     return newChain;

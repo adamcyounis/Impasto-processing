@@ -7,11 +7,23 @@ void Smoothen(Chain c) {
 
     PVector dir = PVector.sub(next.pos, prev.pos);
     dir.normalize();
-    dir.mult(PVector.dist(p.pos, prev.pos) / 3.0);
-    p.leftCP = PVector.sub(p.pos, dir);
-    dir.normalize();
 
-    dir.mult(PVector.dist(p.pos, next.pos) /3.0);
-    p.rightCP = PVector.add(p.pos, dir);
+    //concave or convex check
+    PVector toNext = PVector.sub(next.pos, p.pos);
+    PVector toPrev = PVector.sub(prev.pos, p.pos);
+    float cross = toNext.x * toPrev.y - toNext.y * toPrev.x;
+
+    boolean isConvex = cross > 0;
+    float angle = PVector.angleBetween(toNext, toPrev);
+
+
+    if ( angle > PI/2 *0.9f) {
+      dir.mult(PVector.dist(p.pos, prev.pos) / 3.0);
+      p.lc = PVector.sub(p.pos, dir);
+      dir.normalize();
+
+      dir.mult(PVector.dist(p.pos, next.pos) /3.0);
+      p.rc = PVector.add(p.pos, dir);
+    }
   }
 }
