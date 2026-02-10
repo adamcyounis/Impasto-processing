@@ -13,13 +13,15 @@ float activeRadius = 20;
 static History history;
 KeyboardInput keys;
 boolean debugging;
+FrameProfiler profiler;
+
 enum DrawMode {
   Default, Drawing, Modify
 }
 
 DrawMode mode;
 void setup() {
-
+  profiler = new FrameProfiler();
   frameRate(120);
   size(1280, 720, P2D);
   //pixelDensity(2);
@@ -54,17 +56,15 @@ void draw() {
 }
 
 void DrawApplication() {
+  profiler.Start();
   background(255);
-
   if (mode != DrawMode.Drawing) {
     HandleInputs();
   }
-
   if (mode != DrawMode.Modify) {
     HandlePressure();
     HandleStroke();
   }
-
   pushMatrix();
   scale(zoom);
   translate(view.x, view.y);
@@ -122,16 +122,27 @@ void BeginStroke() {
 
 void UpdateStroke() {
   PVector mousePos = new PVector(mouseX, mouseY);
-  int dist = int(PVector.dist(prevMousePos, mousePos));
-  for (int i = 0; i < dist; i++) {
-    PVector pos = PVector.lerp(prevMousePos, mousePos, i/(float)dist);
-    Stamp(pos);
-    // Copy result back to buffer
-    bufferTexture.beginDraw();
-    bufferTexture.image(temp, 0, 0);
-    bufferTexture.endDraw();
-  }
+
+  bufferTexture.beginDraw();
+  bufferTexture.noFill();
+  bufferTexture.stroke(0);
+  bufferTexture.strokeWeight(activeRadius * 2);
+  bufferTexture.strokeCap(ROUND);
+  bufferTexture.line(prevMousePos.x, prevMousePos.y, mousePos.x, mousePos.y);
+  bufferTexture.endDraw();
 }
+
+void Stamp(PVector mousePos) {
+  float x = mousePos.x;
+  float y = height -mousePos.y;
+  brushShader.set("mousePos", x, y);
+  brushShader.set("bufferTexture", bufferTexture);
+  temp.beginDraw();
+  temp.shader(brushShader);
+  temp.rect(0, 0, width, height);
+  temp.endDraw();
+}
+
 
 void EndStroke() {
   mode = DrawMode.Default;
@@ -161,16 +172,6 @@ void EndStroke() {
   //convert the bitmap into a vector shape;
 }
 
-void Stamp(PVector mousePos) {
-  float x = mousePos.x;
-  float y = height -mousePos.y;
-  brushShader.set("mousePos", x, y);
-  brushShader.set("bufferTexture", bufferTexture);
-  temp.beginDraw();
-  temp.shader(brushShader);
-  temp.rect(0, 0, width, height);
-  temp.endDraw();
-}
 
 
 void DrawUI() {
@@ -193,7 +194,11 @@ void DrawUI() {
   logs.add("Canvas Chains: " + GetCanvas().chains.size());
   logs.add("Canvas Shapes: " + GetCanvas().shapes.size());
   logs.add("Debug Mode: " + (debugging ? "ON" : "OFF") + " (Press ` to toggle)");
-
+  logs.add("Framerate: " + nf(frameRate, 1, 2));
+  for(int i = 0; i < profiler.logs.size(); i++) {
+    FrameProfiler.Entry e = profiler.logs.get(i);
+    logs.add(e.name + ": " + nf(e.time, 1, 2) + "ms");
+  }
   //draw a stroke preview circle at mouse position of radius size in screen space
   noFill();
   stroke(0);
