@@ -1,6 +1,8 @@
-import codeanticode.tablet.*;
+import java.awt.geom.Area;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
 
-Tablet tablet;
+//Tablet tablet;
 PVector view;
 float zoom = 1.0;
 
@@ -23,11 +25,11 @@ DrawMode mode;
 void setup() {
   profiler = new FrameProfiler();
   frameRate(120);
-  size(1280, 720, P2D);
+  size(1280, 720, JAVA2D);
   //pixelDensity(2);
   //turn anti aliasing off for crisp lines
   noSmooth();
-  tablet = new Tablet(this);
+  //tablet = new Tablet(this);
 
   keys = new KeyboardInput();
   view = new PVector(0, 0);
@@ -35,18 +37,18 @@ void setup() {
   history.AddState(new Canvas());
 
   // Create offscreen buffer
-  temp = createGraphics(width, height, P2D);
-  bufferTexture = createGraphics(width, height, P2D);
+  temp = createGraphics(width, height, JAVA2D);
+  bufferTexture = createGraphics(width, height, JAVA2D);
   bufferTexture.beginDraw();
   bufferTexture.background(255); // Start with white
   bufferTexture.endDraw();
 
   // Load shader
-  brushShader = loadShader("data/brush.frag");
+  //brushShader = loadShader("data/brush.frag");
 
   // Set uniforms that NEVER change
-  brushShader.set("resolution", float(width), float(height));
-  brushShader.set("brushRadius", radius);
+  //brushShader.set("resolution", float(width), float(height));
+ // brushShader.set("brushRadius", radius);
   mode = DrawMode.Default;
 }
 
@@ -89,10 +91,12 @@ void DrawShapes() {
 }
 
 void HandlePressure() {
+/*
   if (tablet != null && tablet.getPressure() > 0) {
     activeRadius = map(tablet.getPressure(), 0, 1, 1, radius);
     brushShader.set("brushRadius", activeRadius);
   }
+*/
 }
 
 void HandleStroke() {
@@ -135,10 +139,10 @@ void UpdateStroke() {
 void Stamp(PVector mousePos) {
   float x = mousePos.x;
   float y = height -mousePos.y;
-  brushShader.set("mousePos", x, y);
-  brushShader.set("bufferTexture", bufferTexture);
+  //brushShader.set("mousePos", x, y);
+  //brushShader.set("bufferTexture", bufferTexture);
   temp.beginDraw();
-  temp.shader(brushShader);
+  //temp.shader(brushShader);
   temp.rect(0, 0, width, height);
   temp.endDraw();
 }
@@ -163,6 +167,19 @@ void EndStroke() {
   }
   Canvas canvas = GetCanvas().Clone();
   canvas.shapes.add(newShape);
+/*
+  //check if the new shape overlaps with any existing shapes and if so, union them together
+  for (int i = 0; i < canvas.shapes.size() - 1; i++) {
+    Shape s = canvas.shapes.get(i);
+    if (s.Overlaps(newShape)) {
+      Shape union = UnionShapes(s, newShape);
+      canvas.shapes.set(i, union);
+      canvas.shapes.remove(canvas.shapes.size() - 1);
+      newShape = union;
+      i--;
+    }
+  }
+    */
 
   //clear the buffer texture
   bufferTexture.beginDraw();
@@ -187,9 +204,9 @@ void DrawUI() {
   logs.add("View: (" + nf(view.x, 1, 2) + ", " + nf(view.y, 1, 2) + ") (Use middle mouse button to pan)");
 
   //log pen pressure
-  if (tablet != null) {
-    logs.add("Pen Pressure: " + nf(tablet.getPressure(), 1, 2));
-  }
+  //if (tablet != null) {
+  // logs.add("Pen Pressure: " + nf(tablet.getPressure(), 1, 2));
+  // }
 
   logs.add("Canvas Chains: " + GetCanvas().chains.size());
   logs.add("Canvas Shapes: " + GetCanvas().shapes.size());

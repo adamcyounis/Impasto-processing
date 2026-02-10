@@ -93,4 +93,11 @@ class Chain {
       p.RescaleToView(view, zoom);
     }
   }
+
+  boolean Overlaps(Chain other) {
+    Area area1 = new Area(ChainToPath2D(this));
+    Area area2 = new Area(ChainToPath2D(other));
+    area1.intersect(area2);
+    return !area1.isEmpty();
+  }
 }

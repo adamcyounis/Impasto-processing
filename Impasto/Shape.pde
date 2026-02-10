@@ -32,4 +32,15 @@ class Shape {
       c.RescaleToView();
     }
   }
+
+  boolean Overlaps(Shape other){
+    for (Chain c1 : chains) {
+      for (Chain c2 : other.chains) {
+        if (c1.Overlaps(c2)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }
